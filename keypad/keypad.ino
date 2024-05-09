@@ -11,28 +11,18 @@ const int LEDColPins[] = {41, 39, 37, 35, 33, 31, 29, 27, 25, 23}; // LED Column
 const int NUM_SLIDERS = 6;
 const int analogInputs[NUM_SLIDERS] = {A2, A3, A4, A5, A7, A9};
 
+const int keyLightTimeout = 100;
+
 #define ROWS 4
 #define COLS 10
-int keyState[ROWS][COLS] = {0}; // Holds the state of each key
+
+bool keyState[ROWS][COLS] = {false}; // Holds the state of each key
+
 
 // State definitions for key states
 #define NONE 0
 #define PRESSED 1
 #define HELD 2
-
-bool buttonBuffer[ROWS][COLS] = {
-  {false, false, false, false, false, false, false, false, false, false},
-  {false, false, false, false, false, false, false, false, false, false},
-  {false, false, false, false, false, false, false, false, false, false},
-  {false, false, false, false, false, false, false, false, false, false}
-};
-
-bool litButtons[ROWS][COLS] = {
-  {false, false, false, false, false, false, false, false, false, false},
-  {false, false, false, false, false, false, false, false, false, false},
-  {false, false, false, false, false, false, false, false, false, false},
-  {false, false, false, false, false, false, false, false, false, false}
-};
 
 
 void setup() {
@@ -56,6 +46,15 @@ void setup() {
       pinMode(analogInputs[i], INPUT);
     }
 
+
+    // for(int row = 0; row < ROWS; row++){
+    //   for(int col = 0; col < COLS; col++){
+    //     if((row+col) % 2 == 0){
+    //       keyState[row][col] = true;
+    //     }
+    //   }
+    // }
+
     // for(int y = 0; y < litButtons.length; y++){
     //   for(int x = 0; x < litButtons[y].length; x++){
     //     litButtons
@@ -78,74 +77,65 @@ void setup() {
 // }
 
 void updateLights(){
+  for (int row = 0; row < ROWS; row++) {
+    for (int col = 0; col < COLS; col++) {
+      if (keyState[row][col]) {
+        // Turn on the LED
 
-  // Find next enabled light
-  // while(true){
-    for (int row = 0; row < ROWS; row++) {
+        // Serial.println(time);
 
-        digitalWrite(LEDRowPins[row], HIGH);  // Activate row
-        for (int col = 0; col < COLS; col++) {
-            if (buttonBuffer[row][col]) {
+        digitalWrite(LEDRowPins[row], HIGH);
+        digitalWrite(LEDColPins[col], LOW);
 
-              // Serial.print(row);
-              // Serial.print(", ");
-              // Serial.println(col);
-              
-              digitalWrite(LEDColPins[col], LOW);
-              delay(1);
-              digitalWrite(LEDColPins[col], HIGH);
-              
-                // digitalWrite(LEDRowPins[row], HIGH);
-                // digitalWrite(LEDColPins[col], LOW);
-                // Serial.print("Button pressed at row ");
-                // Serial.print(row);
-                // Serial.print(", col ");
-                // Serial.println(col);
-                // delay(1000);  // Keep the LED on for a second
-                // digitalWrite(LEDRowPins[row], LOW);
-                // digitalWrite(LEDColPins[col], HIGH);
-            }
-        }
-      // for(int col = 0; col < COLS; col++){
-      //   digitalWrite(LEDColPins[col], HIGH);
-      // }
-      
-      digitalWrite(LEDRowPins[row], LOW);  // Deactivate row
+        delay(1); // Short delay to keep the LED visible
+
+        // Turn off the LED
+        digitalWrite(LEDRowPins[row], LOW);
+        digitalWrite(LEDColPins[col], HIGH);
+      }
     }
-  // }
-
+  }
 }
 
+void lightsOff(){
+  for (int row = 0; row < ROWS; row++) {
+    for (int col = 0; col < COLS; col++) {
+      keyState[row][col] = false;
+    }
+  }
+}
+
+unsigned long lastupdated = 0;
+
 void loop() {
+
   updateLights();
+
+
+  if(millis()-lastupdated > keyLightTimeout){
+    lastupdated = millis();
+    lightsOff();
+    // Serial.println("Lights reset!");
+  }
+
 
     for (int row = 0; row < ROWS; row++) {
         digitalWrite(switchRowPins[row], LOW);  // Activate row
         for (int col = 0; col < COLS; col++) {
-            if (digitalRead(switchColPins[col]) == LOW) {
-                // digitalWrite(LEDRowPins[row], HIGH);
-                // digitalWrite(LEDColPins[col], LOW);
+          if(digitalRead(switchColPins[col]) == LOW){
+            keyState[row][col] = true;
 
-                litButtons[row][col] = true;
+            // Serial.print(row);
+            // Serial.print(", ");
+            // Serial.print(col);
+            // Serial.print(" ");
+            // Serial.println("Pressed!");
 
-                // delay(1000);  // Keep the LED on for a second
-                // digitalWrite(LEDRowPins[row], LOW);
-                // digitalWrite(LEDColPins[col], HIGH);
-            }
+            lastupdated = millis();
+          }
+
+          
         }
         digitalWrite(switchRowPins[row], HIGH);  // Deactivate row
     }
 }
-
-// #include <Arduino.h>
-
-
-// void setup() {
-//   //Test serial out
-//   Serial.begin(115200);
-//   delay(10000);
-//   Serial.print("Test");
-// }
-
-// void loop() {
-// }
