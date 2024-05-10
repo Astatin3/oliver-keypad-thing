@@ -8,15 +8,17 @@ const int switchColPins[] = {40, 38, 36, 34, 32, 30, 28, 26, 24, 22}; // Switch 
 const int LEDRowPins[] = {51, 49, 47, 45}; // LED Rows (Anodes)
 const int LEDColPins[] = {41, 39, 37, 35, 33, 31, 29, 27, 25, 23}; // LED Columns (Cathodes)
 
-const int NUM_SLIDERS = 6;
-const int analogInputs[NUM_SLIDERS] = {A2, A3, A4, A5, A7, A9};
+const int NUM_SLIDERS = 10;
+const int analogInputs[NUM_SLIDERS] = {A9, A8, A7, A6, A5, A4, A3, A2, A1, A0};
 
 const int keyLightTimeout = 100;
+const int sliderUpdateTolerance = 8;
 
 #define ROWS 4
 #define COLS 10
 
 bool keyState[ROWS][COLS] = {false}; // Holds the state of each key
+int analogSliderValues[NUM_SLIDERS];
 
 
 // State definitions for key states
@@ -46,35 +48,7 @@ void setup() {
       pinMode(analogInputs[i], INPUT);
     }
 
-
-    // for(int row = 0; row < ROWS; row++){
-    //   for(int col = 0; col < COLS; col++){
-    //     if((row+col) % 2 == 0){
-    //       keyState[row][col] = true;
-    //     }
-    //   }
-    // }
-
-    // for(int y = 0; y < litButtons.length; y++){
-    //   for(int x = 0; x < litButtons[y].length; x++){
-    //     litButtons
-    //   }
-    // }
 }
-
-// bool arrayIsFalse(bool arr[]){
-//   for(bool b : arr){
-//     if(!b){return false;}
-//   }
-//   return true;
-// }
-
-// bool array2dIsFalse(bool arr[][]){
-//   for(bool b[] : arr){
-//     if(!arrayIsFalse(b)){return false;}
-//   }
-//   return true;
-// }
 
 void updateLights(){
   for (int row = 0; row < ROWS; row++) {
@@ -105,11 +79,27 @@ void lightsOff(){
   }
 }
 
+int newVal = 0;
+
+void updateSliderValues() {
+  for (int i = 0; i < NUM_SLIDERS; i++) {
+    newVal = analogRead(analogInputs[i]);
+    if(abs(analogSliderValues[i]-newVal) >= sliderUpdateTolerance){
+      analogSliderValues[i] = newVal;
+      Serial.print("1|");
+      Serial.print(i+1);
+      Serial.print("|");
+      Serial.println(newVal);
+    }
+  }
+}
+
 unsigned long lastupdated = 0;
 
 void loop() {
 
   updateLights();
+  updateSliderValues();
 
 
   if(millis()-lastupdated > keyLightTimeout){
@@ -123,13 +113,16 @@ void loop() {
         digitalWrite(switchRowPins[row], LOW);  // Activate row
         for (int col = 0; col < COLS; col++) {
           if(digitalRead(switchColPins[col]) == LOW){
+
+            if(keyState[row][col] == false){
+              Serial.print("0|");
+              Serial.print(row);
+              Serial.print("|");
+              Serial.println(col);
+            }
+
             keyState[row][col] = true;
 
-            // Serial.print(row);
-            // Serial.print(", ");
-            // Serial.print(col);
-            // Serial.print(" ");
-            // Serial.println("Pressed!");
 
             lastupdated = millis();
           }
