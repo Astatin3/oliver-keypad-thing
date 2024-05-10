@@ -70,7 +70,7 @@ def handle_slider(id:int, pos:int):
             print(", and set master volume", end="")
             setMasterVolume(pos)
         else:
-            print(f", and set the volume of {slider["program"]}", end="")
+            print(f", and set the volume of {slider['program']}", end="")
             setProgramVolume(pos, slider["program"])
             
     print("\n", end="")
@@ -89,5 +89,7 @@ while ser.is_open:
     match (val[0]):
         case 0: # Button
             pos = (int(val[1]), int(val[2]))
+            handle_button(pos)
         case 1: # Slider
-            level = (int(slider)/1024)*100
+            level = (int(val[2])/1024)*100
+            handle_slider(val[1], level)
