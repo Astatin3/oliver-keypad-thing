@@ -1,4 +1,5 @@
 SERIAL_PORT = "COM1"
+SERIAL_BUAD_RATE = 9600
 
 AHK_PATH = "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
 AHK_SCRIPTS_DIR = "C:\\Users\\astatin3\\Documents\\AutoHotkey\\"
@@ -81,7 +82,7 @@ def serial_ports():
 
 serial_ports()
 
-ser = Serial('SERIAL_PORT', 9600)
+ser = Serial(SERIAL_PORT, SERIAL_BUAD_RATE)
 
 while ser.is_open:
     cc=str(ser.readline())
