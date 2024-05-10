@@ -55,7 +55,7 @@ def handle_button(pos:tuple):
         if button["pos"] != pos:
             continue
 
-        print(f", and ran AHK Script: {AHK_SCRIPTS_DIR}{button["script"]}", end="")
+        print(f", and ran AHK Script: {AHK_SCRIPTS_DIR}{button['script']}", end="")
         run_ahk_script(button["script"])
 
     print("\n", end="")
