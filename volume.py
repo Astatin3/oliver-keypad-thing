@@ -61,18 +61,26 @@ def handle_button(pos:tuple):
 
     print("\n", end="")
 
+def sliderUpdate(num: int, program: str):
+    if slider["program"] == "master":
+        print(", and set master volume", end="")
+        setMasterVolume(pos)
+    else:
+        print(f", and set the volume of {slider['program']}", end="")
+        setProgramVolume(pos, slider["program"])
+
 def handle_slider(id:int, pos:int):
     print(f"Slider {id} is at {pos}%", end="")
     for slider in SLIDER_VALS:
         if slider["id"] != id:
             continue
+        if type(slider['program']) == list:
+            for program in slider['program']:
+                sliderUpdate(pos, program)
+        elif type(slider['program']) == str:
+            sliderUpdate(pos, program)
+        
 
-        if slider["program"] == "master":
-            print(", and set master volume", end="")
-            setMasterVolume(pos)
-        else:
-            print(f", and set the volume of {slider['program']}", end="")
-            setProgramVolume(pos, slider["program"])
             
     print("\n", end="")
 
