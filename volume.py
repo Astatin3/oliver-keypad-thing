@@ -1,4 +1,4 @@
-SERIAL_PORT = "COM1"
+SERIAL_PORT = "COM3"
 SERIAL_BUAD_RATE = 9600
 
 AHK_PATH = "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
@@ -43,7 +43,7 @@ def setProgramVolume(num: int, program: str):
     if num < 0 or num > 100: return
     for session in sessions:
         volume = session._ctl.QueryInterface(ISimpleAudioVolume)
-        if session.Process and session.Process.name().lower() == program.lower():
+        if session.Process and session.Process.name() == program:
             volume.SetMasterVolume(num/100, None)
             # print(f"{session.Process.name()} volume.GetMasterVolume(): {volume.GetMasterVolume()}")
 
@@ -87,10 +87,10 @@ ser = Serial(SERIAL_PORT, SERIAL_BUAD_RATE)
 while ser.is_open:
     cc=str(ser.readline())
     val = cc[2:][:-5].split('|')
-    match (val[0]):
+    match (int(val[0])):
         case 0: # Button
             pos = (int(val[1]), int(val[2]))
             handle_button(pos)
         case 1: # Slider
             level = (int(val[2])/1024)*100
-            handle_slider(val[1], level)
+            handle_slider(int(val[1]), level)
