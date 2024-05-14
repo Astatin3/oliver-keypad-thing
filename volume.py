@@ -64,10 +64,10 @@ def handle_button(pos:tuple):
 def sliderUpdate(num: int, program: str):
     if program == "master":
         print(", and set master volume", end="")
-        setMasterVolume(pos)
+        setMasterVolume(num)
     else:
         print(f", and set the volume of {program}", end="")
-        setProgramVolume(pos, program)
+        setProgramVolume(num, program)
 
 def handle_slider(id:int, pos:int):
     print(f"Slider {id} is at {pos}%", end="")
