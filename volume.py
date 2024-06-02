@@ -29,8 +29,6 @@ from serial import Serial
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, ISimpleAudioVolume
 
-sessions = AudioUtilities.GetAllSessions()
-
 devices = AudioUtilities.GetSpeakers()
 interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
 masterVolume = interface.QueryInterface(IAudioEndpointVolume)
@@ -40,7 +38,8 @@ def setMasterVolume(num: int):
     masterVolume.SetMasterVolumeLevelScalar((num/100), None)
 
 def setProgramVolume(num: int, program: str):
-    if num < 0 or num > 100: return
+    if num < 0 or num > 100: return    
+    sessions = AudioUtilities.GetAllSessions()
     for session in sessions:
         volume = session._ctl.QueryInterface(ISimpleAudioVolume)
         if session.Process and session.Process.name() == program:
