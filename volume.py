@@ -28,7 +28,7 @@ import math
 import subprocess
 from serial import Serial
 from threading import Thread
-from comtypes import CLSCTX_ALL
+from comtypes import CLSCTX_ALL, CoInitialize, CoUninitialize
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, ISimpleAudioVolume
 
 devices = AudioUtilities.GetSpeakers()
@@ -36,12 +36,6 @@ interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
 masterVolume = interface.QueryInterface(IAudioEndpointVolume)
 
 sessions = None
-
-def device_update_thread():
-    global sessions
-    while True:
-        sessions = AudioUtilities.GetAllSessions()
-        time.sleep(1)
 
 def setMasterVolume(num: int):
     if num < 0 or num > 100: return
@@ -100,6 +94,15 @@ def serial_ports():
 serial_ports()
 
 ser = Serial(SERIAL_PORT, SERIAL_BUAD_RATE)
+
+def device_update_thread():
+    global sessions
+    global ser
+    CoInitialize()
+    while ser.is_open:
+        sessions = AudioUtilities.GetAllSessions()
+        time.sleep(1)
+    CoUninitialize()
 
 sessions_thread = Thread(target = device_update_thread)
 sessions_thread.start()
